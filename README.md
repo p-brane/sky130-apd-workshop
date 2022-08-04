@@ -118,9 +118,8 @@ Magic now shows the status of the standard cells, there may still be an error.
 
 To place the standard cells run 'run_placement'.
 
-
-x
-
+![](assets/sky130_apd_workshop_day2_lab1_results-83a009ec.png)
+![](assets/sky130_apd_workshop_day2_lab1_results-f8b39466.png)
 
 ## Day 3
 
