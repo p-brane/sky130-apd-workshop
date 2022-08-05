@@ -2,8 +2,11 @@
 
 Results for Jay Morreale for the VSD Advanced Physical Design Course held Aug 2-6.
 
+[TOC]
+
 ## Day 1
 
+### Start openLANE
 The flowing sequence is the is used to run an interactive OpenLANE flow to synthesis the picorv32a design.
 
 ```
@@ -18,6 +21,9 @@ The figure below shows the first step.
 
 * ![](assets/sky130_pd_lab_01_noted-da8234e6.png)
 * ![](assets/sky130_pd_lab_01_noted-09e8873b.png)
+
+### Synthesis
+
 * ![](assets/sky130_pd_lab_01_noted-5d72c0ab.png)
 
 The Flop ratio from 1-yosys_4.stat.rpt is 1613/14876=0.1084
@@ -108,13 +114,13 @@ An error occurred so run_synthesis and run_placement error run again.
 
 The magic command becomes
 
-`magic -T /home/p-brane/Desktop/work/tools/openlane_working_dir/pdks/sky130A/libs.tech/magic/sky130A.tech lef read /home/p-brane/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/runs/04-08_06-57/tmp/merged.lef def read /home/p-brane/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/runs/04-08_06-57j/results/floorplan/picov32a.floorplan.def &`
+`magic -T /home/p-brane/Desktop/work/tools/openlane_working_dir/pdks/sky130A/libs.tech/magic/sky130A.tech lef read /home/p-brane/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/runs/04-08_06-57/tmp/merged.lef def read /home/p-brane/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/runs/04-08_06-57j/results/floorplan/picorv32a.floorplan.def &`
 
 Magic now shows the status of the standard cells, there may still be an error.
 
 ![](assets/sky130_apd_workshop_day2_lab1_results-5ed1fb95.png)
 
-## Placement
+### Placement
 
 To place the standard cells run 'run_placement'.
 
@@ -122,6 +128,132 @@ To place the standard cells run 'run_placement'.
 ![](assets/sky130_apd_workshop_day2_lab1_results-f8b39466.png)
 
 ## Day 3
+
+### CMOS Inverter Standard Cell
+
+Download the vsdstdcelldesign from GitHub to the openlane directory. This can be accomplished using the following commands
+
+`cd /home/Desktop/work/tools/openlane_working_dir/openlane`
+`git clone https://github.com/nickson-jose/vsdstdcelldesign.git`
+
+![](assets/sky130_apd_workshop_day3_lab1_results-34b60ffb.png)
+
+Move into the vsdstdcelldesign directory and copy the sky130A.tech file to the vsdstdcelldesign directory
+
+`cd vsdstdcelldesign`
+`cp /home/Desktop/work/tools/openlane_working_dir/pdks/sky130A/libs.tech/magic/sly130A.tech  .`
+
+![](assets/sky130_apd_workshop_day3_lab1_results-2000f042.png)
+
+### Inverter Layout in Magic
+
+Run magic using `magic -d XR -T sky130A.tech sky130_inv.mag&` The -d XR setting use a different graphics system and produces a clearer window.
+
+![](assets/sky130_apd_workshop_day3_lab1_results-b1507618.png)
+
+### Extracted SPICE Netlist
+
+To extract a spice netlist, then the parasitic capacitance and resistance.
+
+```
+extract all
+ext2spice cthresh 0 rthresh 0
+ext2spice
+```
+
+![](assets/sky130_apd_workshop_day3_lab1_results-810208a2.png)
+
+This generates teh sky130_inv.ext and sky130_inv.spice files.
+
+![](assets/sky130_apd_workshop_day3_lab1_results-2431da87.png)
+
+sky130_inv.ext file
+```
+timestamp 1600540370
+version 8.3
+tech sky130A
+style ngspice()
+scale 1000 1 1e+06
+resistclasses 2200000 3050000 1700000 3050000 120000 197000 114000 191000 120000 197000 114000 191000 48200 319800 2000000 48200 48200 12200 125 125 47 47 29 5
+parameters sky130_fd_pr__nfet_01v8 l=l w=w a1=as p1=ps a2=ad p2=pd
+parameters sky130_fd_pr__pfet_01v8 l=l w=w a1=as p1=ps a2=ad p2=pd
+port "Y" 2 96 121 131 164 li
+port "A" 1 10 121 45 164 li
+port "VPWR" 3 44 258 90 289 m1
+port "VGND" 5 50 -3 105 26 m1
+node "Y" 474 347.122 96 121 li 0 0 0 0 0 0 0 0 1435 152 1443 152 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 5951 544 0 0 0 0 0 0 0 0 0 0 0 0
+node "A" 462 409.094 10 121 li 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 7322 578 0 0 2295 192 0 0 0 0 0 0 0 0 0 0 0 0
+node "VPWR" 2717 828.259 44 258 m1 0 0 0 0 33630 734 0 0 2950 286 1517 156 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 6865 546 8496 450 0 0 0 0 0 0 0 0 0 0
+substrate "VGND" 0 0 50 -3 m1 0 0 0 0 0 0 0 0 1365 148 2574 278 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 6941 498 8064 432 0 0 0 0 0 0 0 0 0 0
+cap "VPWR" "A" 66.0605
+cap "VPWR" "Y" 106.092
+cap "A" "Y" 45.4865
+device msubckt sky130_fd_pr__nfet_01v8 49 41 50 42 l=23 w=35 "VGND" "A" 46 0 "VGND" 35 0 "Y" 35 0
+device msubckt sky130_fd_pr__pfet_01v8 49 196 50 197 l=23 w=37 "VPWR" "A" 46 0 "VPWR" 37 0 "Y" 37 0
+subcap "Y" -107.681
+subcap "A" -45.9469
+subcap "VPWR" -243.219
+subcap "VGND" -109.355
+```
+sky130_inv.spice file
+```
+* SPICE3 file created from sky130_inv.ext - technology: sky130A
+
+.option scale=10000u
+
+.subckt sky130_inv A Y VPWR VGND
+X0 Y A VGND VGND sky130_fd_pr__nfet_01v8 ad=0 pd=0 as=0 ps=0 w=35 l=23
+X1 Y A VPWR VPWR sky130_fd_pr__pfet_01v8 ad=0 pd=0 as=0 ps=0 w=37 l=23
+C0 Y A 0.05fF
+C1 VPWR A 0.07fF
+C2 Y VPWR 0.11fF
+C3 Y VGND 0.24fF
+C4 VPWR VGND 0.59fF
+.ends
+```
+### Spice Deck
+
+Update the sky130_inv.spice file to use the correct scaling factor and models. From the tkcon the root cell box is 0.01 x 0.01 microns. The scale is change to `.option scale =0.01u'
+
+![](assets/sky130_apd_workshop_day3_lab1_results-c74458c3.png)
+
+Updated SPICE Netlist
+
+```
+‌‌* SPICE3 file created from sky130_inv.ext - technology: sky130A
+
+.option scale=0.01u
+.include ./libs/nshort.lib
+.include ./libs/pshort.lib
+
+//.subckt sky130_inv A Y VPWR VGND
+M0 Y A VGND VGND nshort_model.0 ad=0 pd=0 as=0 ps=0 w=35 l=23
+M1 Y A VPWR VPWR pshort_model.0 ad=0 pd=0 as=0 ps=0 w=37 l=23
+VDD VPWR 0 3.3V
+VSS VGND 0 0V
+Va A VGND PULSE(0V 3.3V 0 0.1n 0.1n 2ms 4m)
+C0 Y A 0.05fF
+C1 VPWR A 0.07fF
+C2 Y VPWR 0.11fF
+C3 Y VGND 0.24fF
+C4 VPWR VGND 0.59fF
+//.ends
+.tran 1n 20m
+.control
+run
+.endc
+.end
+```
+### SPICE Simulation
+
+Simulate the SPICE deck using 'ngspice sky130_inv.spice'
+
+![](assets/sky130_apd_workshop_day3_lab1_results-099cefbf.png)
+
+Then plot the results `plot y vs time a`
+
+![](assets/sky130_apd_workshop_day3_lab1_results-d200084f.png)
+
 
 ## Day 4
 
