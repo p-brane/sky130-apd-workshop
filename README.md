@@ -254,7 +254,213 @@ Then plot the results `plot y vs time a`
 
 ![](assets/sky130_apd_workshop_day3_lab1_results-d200084f.png)
 
-
 ## Day 4
+
+### Inverter Cell
+
+Go to the vsdstdcelldesign directory at `/home/p-brane/Desktop/work/tools/openlane_working_dir/openlane/vsdstdcelldesign` and run Magic on the for the inverter.
+
+‌`magic -d XR -T sky130A.tech sky130_inv.mag&`
+
+![](assets/sky130_apd_workshop_day4_lab1_results-0b8b6d56.png)
+
+![](assets/sky130_apd_workshop_day4_lab1_results-e46a7ca3.png)
+
+### Check Grid Alignment
+The inverter cell is laid out on a grid that must match the pitch and offsets defined in the tracks.info file located at `/home/p-brane/Desktop/work/tools/openlane_working_dir/pdks/sky130A/libs.tech/openlane/sky130_fd_sc_hd/tracks.inf`
+The file contains the layer name, X or Y dimension, offset, and pitch as shown below.
+```
+li1 X 0.23 0.46
+li1 Y 0.17 0.34
+met1 X 0.17 0.34
+met1 Y 0.17 0.34
+met2 X 0.23 0.46
+met2 Y 0.23 0.46
+met3 X 0.34 0.68
+met3 Y 0.34 0.68
+met4 X 0.46 0.92
+met4 Y 0.46 0.92
+met5 X 1.70 3.40
+met5 Y 1.70 3.40
+```
+The default grid is 0.01 um x 0.01 um as shown in the tkcon above. It can be changed to match the tracks.info grid for the li (locali) layer. Using `grid 0.46um 0.34ym 0.23um 0.17um`
+
+![](assets/sky130_apd_workshop_day4_lab1_results-1d1145c2.png)
+
+The alignment of the cell elements with the grid can be verified.
+
+![](assets/sky130_apd_workshop_day4_lab1_results-d5201aed.png)
+
+### Assign Ports for LEF File Generation
+
+To create aa lef files the ports of the need to be defined for pins in the lef macro
+
+![](assets/sky130_apd_workshop_day4_lab1_results-b04a1f5d.png)
+
+Define the input port A and set the class to input and use to signal.
+
+![](assets/sky130_apd_workshop_day4_lab1_results-549c9921.png)
+![](assets/sky130_apd_workshop_day4_lab1_results-a915e874.png)
+
+Define output port Y and set the class to output and use to signal.
+
+![](assets/sky130_apd_workshop_day4_lab1_results-7cdebd23.png)
+![](assets/sky130_apd_workshop_day4_lab1_results-01e6c032.png)
+
+Define VPWR port and set the class to input and use to power.
+
+![](assets/sky130_apd_workshop_day4_lab1_results-295a3862.png)
+![](assets/sky130_apd_workshop_day4_lab1_results-840c3dca.png)
+
+Define VGND port and set the class to input and use to ground.
+
+![](assets/sky130_apd_workshop_day4_lab1_results-42734cd2.png)
+![](assets/sky130_apd_workshop_day4_lab1_results-19bf55d3.png)
+
+Save the file: `save sky130_jayinv.mag`
+![](assets/sky130_apd_workshop_day4_lab1_results-aa747cf7.png)
+Open the new file using `magic -d XR -T sky130A.tech sky130_jayinv.mag&`
+
+### LEF FIle
+Usr `lef write` to generate a lef file
+![](assets/sky130_apd_workshop_day4_lab1_results-3b3b5d51.png)
+
+The generated sky130_jayinv.lef file is shown below
+```
+VERSION 5.7 ;
+  NOWIREEXTENSIONATPIN ON ;
+  DIVIDERCHAR "/" ;
+  BUSBITCHARS "[]" ;
+MACRO sky130_jayinv
+  CLASS CORE ;
+  FOREIGN sky130_jayinv ;
+  ORIGIN 0.000 0.000 ;
+  SIZE 1.380 BY 2.720 ;
+  SITE unithd ;
+  PIN A
+    DIRECTION INPUT ;
+    USE SIGNAL ;
+    ANTENNAGATEAREA 0.165600 ;
+    PORT
+      LAYER li1 ;
+        RECT 0.060 1.180 0.510 1.690 ;
+    END
+  END A
+  PIN Y
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    ANTENNADIFFAREA 0.287800 ;
+    PORT
+      LAYER li1 ;
+        RECT 0.760 1.960 1.100 2.330 ;
+        RECT 0.880 1.690 1.050 1.960 ;
+        RECT 0.880 1.180 1.330 1.690 ;
+        RECT 0.880 0.760 1.050 1.180 ;
+        RECT 0.780 0.410 1.130 0.760 ;
+    END
+  END Y
+  PIN VPWR
+    DIRECTION INPUT ;
+    USE POWER ;
+    PORT
+      LAYER nwell ;
+        RECT -0.200 1.140 1.570 3.040 ;
+      LAYER li1 ;
+        RECT -0.200 2.580 1.430 2.900 ;
+        RECT 0.180 2.330 0.350 2.580 ;
+        RECT 0.100 1.970 0.440 2.330 ;
+      LAYER mcon ;
+        RECT 0.230 2.640 0.400 2.810 ;
+        RECT 1.000 2.650 1.170 2.820 ;
+      LAYER met1 ;
+        RECT -0.200 2.480 1.570 2.960 ;
+    END
+  END VPWR
+  PIN VGND
+    DIRECTION INPUT ;
+    USE GROUND ;
+    PORT
+      LAYER li1 ;
+        RECT 0.100 0.410 0.450 0.760 ;
+        RECT 0.150 0.210 0.380 0.410 ;
+        RECT 0.000 -0.150 1.460 0.210 ;
+      LAYER mcon ;
+        RECT 0.210 -0.090 0.380 0.080 ;
+        RECT 1.050 -0.090 1.220 0.080 ;
+      LAYER met1 ;
+        RECT -0.110 -0.240 1.570 0.240 ;
+    END
+  END VGND
+END sky130_jayinv
+END LIBRARY
+```
+
+### SRC File Setup
+Copy the provided my_base.sdc and the sky130_jayinv.lef to the picorv32a/src directory
+
+```
+cd /home/p-brane/Desktop/work/tools/openlane_working_dir/openlane/vsdstdcelldesign/extras/
+cp my_base.sdc /home/p-brane/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/src/
+cd /home/p-brane/Desktop/work/tools/openlane_working_dir/openlane/vsdstdcelldesign/
+cp sky130_jayinv.lef
+```
+![](assets/sky130_apd_workshop_day4_lab1_results-0e84de67.png)
+
+Copy the sky130 libraries to the picrv32a directory
+
+```
+cd /home/p-brane/Desktop/work/tools/openlane_working_dir/openlane/vsdstdcelldesign/libs/
+cp sky130_fd_sc_hd__* /home/p-brane/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/src/
+```
+![](assets/sky130_apd_workshop_day4_lab1_results-8534a189.png)
+
+### Config.tcl
+
+Modify the config.tcl to include the copied libraries at  `/home/p-brane/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/config.tcl`
+The modified file is shown below. LIB_MIN was replaced with LIB_FASTEST, and LIB_MAX was replace with LIB_SLOWEST.
+
+```
+
+# Design
+set ::env(DESIGN_NAME) "picorv32a"
+
+set ::env(VERILOG_FILES) "./designs/picorv32a/src/picorv32a.v"
+set ::env(SDC_FILE) "./designs/picorv32a/src/picorv32a.sdc"
+
+set ::env(CLOCK_PERIOD) "12.000"
+set ::env(CLOCK_PORT) "clk"
+
+
+set ::env(CLOCK_NET) $::env(CLOCK_PORT)
+
+set ::env(LIB_SYNTH) "$::env(OPENLANE_ROOT)/designs/picorv32a/src/sky130_fd_sc_hd__typical.lib"
+set ::env(LIB_FASTEST) "$::env(OPENLANE_ROOT)/designs/picorv32a/src/sky130_fd_sc_hd_fast.lib"
+set ::env(LIB_SLOWEST) "$::env(OPENLANE_ROOT)/designs/picorv32a/src/sky130_fd_sc_hd__slow.lib"
+set ::env(LIB_TYPICAL) "$::env(OPENLANE_ROOT)/designs/picorv32a/src/sky130_fd_sc_hd__typical.lib"
+
+set ::env(EXTRA_LEFS) [glob $::env(OPENLANE_ROOT)/designs/$::env(DESIGN_NAME)/src/*.lef]
+
+
+set filename $::env(OPENLANE_ROOT)/designs/$::env(DESIGN_NAME)/$::env(PDK)_$::env(STD_CELL_LIBRARY)_config.tcl
+if { [file exists $filename] == 1} {
+	source $filename
+}
+```
+### OpenLANE
+
+Start openlane
+
+```
+docker
+./flow.tcl interactive
+package require openlane 0.9
+prep -design picorv32a -tag 04-08_06-57 -overwrite
+set lefs [glob $::env(DESIGN_DIR)/src/*.lef]
+add_lefs -src $lefs
+run_synthesis
+```
+![](assets/sky130_apd_workshop_day4_lab1_results-11316483.png)
+
+run_synthesis does not show sky130_jayinv in the cell list so some debugging is needed.
 
 ## Day 5
