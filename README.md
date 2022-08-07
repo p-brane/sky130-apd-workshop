@@ -497,7 +497,6 @@ puts "\[INFO\]: Setting load to: $cap_load"
 set_load  $cap_load [all_outputs]
 ```
 
-
 ### OpenLANE
 
 The files supplied with vsdstdcelldesign name the inverter that we produces sky130_vsdinv in the library. If a different name is used then the sky130_vsd macros in the libraries need to renamed so that the `run_synthesis` tools can find the `sky130_jayinv`.
@@ -631,3 +630,17 @@ violation type: Short
   srcs: VGND _05657_
   bbox = ( 559.98, 470.32 ) - ( 560.12, 470.8 ) on Layer met2
 ```
+
+### Magic
+
+The following command was used to plot the routing in Magic.
+
+```
+magic -d XR -T /home/p-brane/Desktop/work/tools/openlane_working_dir/pdks/sky130A/libs.tech/magic/sky130A.tech lef read /home/p-brane/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/runs/04-08_06-57/tmp/merged.lef def read /home/p-brane/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/runs/04-08_06-57/results/routing/picorv32a.def&
+```
+
+![](assets/sky130_apd_workshop_day5_lab1_results-934102a2.png)
+
+`sky130_fd_sc_hd__buf_1` was selected and expanded to better show the routing.
+
+![](assets/sky130_apd_workshop_day5_lab1_results-4ab33ad8.png)
