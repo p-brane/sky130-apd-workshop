@@ -322,7 +322,7 @@ Save the file: `save sky130_jayinv.mag`
 Open the new file using `magic -d XR -T sky130A.tech sky130_jayinv.mag&`
 
 ### LEF FIle
-Usr `lef write` to generate a lef file
+Use `lef write` to generate a lef file
 ![](assets/sky130_apd_workshop_day4_lab1_results-3b3b5d51.png)
 
 The generated sky130_jayinv.lef file is shown below
@@ -396,17 +396,18 @@ END LIBRARY
 ```
 
 ### SRC File Setup
-Copy the provided my_base.sdc and the sky130_jayinv.lef to the picorv32a/src directory
+Copy the provided `my_base.sdc` file from the `vsdstdcelldesign/extras` and the `sky130_jayinv.lef` to the `picorv32a/src` directory. Copy the `vsdstdcelldesign/extras/sta.conf` file to the openlane directory.
 
 ```
 cd /home/p-brane/Desktop/work/tools/openlane_working_dir/openlane/vsdstdcelldesign/extras/
 cp my_base.sdc /home/p-brane/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/src/
+cp sta.conf /home/p-brane/Desktop/work/tools/openlane_working_dir/openlane/
 cd /home/p-brane/Desktop/work/tools/openlane_working_dir/openlane/vsdstdcelldesign/
-cp sky130_jayinv.lef
+cp sky130_jayinv.lef /home/p-brane/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/src/
 ```
 ![](assets/sky130_apd_workshop_day4_lab1_results-0e84de67.png)
 
-Copy the sky130 libraries to the picrv32a directory
+Copy the sky130 libraries to the picrv32a/src directory
 
 ```
 cd /home/p-brane/Desktop/work/tools/openlane_working_dir/openlane/vsdstdcelldesign/libs/
@@ -420,7 +421,6 @@ Modify the config.tcl to include the copied libraries at  `/home/p-brane/Desktop
 The modified file is shown below. LIB_MIN was replaced with LIB_FASTEST, and LIB_MAX was replace with LIB_SLOWEST.
 
 ```
-
 # Design
 set ::env(DESIGN_NAME) "picorv32a"
 
@@ -434,7 +434,7 @@ set ::env(CLOCK_PORT) "clk"
 set ::env(CLOCK_NET) $::env(CLOCK_PORT)
 
 set ::env(LIB_SYNTH) "$::env(OPENLANE_ROOT)/designs/picorv32a/src/sky130_fd_sc_hd__typical.lib"
-set ::env(LIB_FASTEST) "$::env(OPENLANE_ROOT)/designs/picorv32a/src/sky130_fd_sc_hd_fast.lib"
+set ::env(LIB_FASTEST) "$::env(OPENLANE_ROOT)/designs/picorv32a/src/sky130_fd_sc_hd__fast.lib"
 set ::env(LIB_SLOWEST) "$::env(OPENLANE_ROOT)/designs/picorv32a/src/sky130_fd_sc_hd__slow.lib"
 set ::env(LIB_TYPICAL) "$::env(OPENLANE_ROOT)/designs/picorv32a/src/sky130_fd_sc_hd__typical.lib"
 
@@ -446,9 +446,65 @@ if { [file exists $filename] == 1} {
 	source $filename
 }
 ```
+
+### pre_sta.conf
+
+The `pre_sta.conf` static timing configuration file must be setup. `cd /home/p-brane/Desktop/work/tools/openlane_working_dir/openlane/` and rename the `sta.conf` file to `pre-sta.conf` using `mv sta.conf pre_sta.conf`. Edit the pre_sta.conf file as shown below to add the links to the libraries and the verilog file.
+```
+set_cmd_units -time ns -capacitance pF -current mA -voltage V -resistance kOhm -distance um
+read_liberty -min /home/p-brane/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/src/sky130_fd_sc_hd__fast.lib
+read_liberty -max /home/p-brane/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/src/sky130_fd_sc_hd__slow.lib
+read_verilog /home/p-brane/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/runs/04-08_06-57/results/synthesis/picorv32a.synthesis.v
+link_design picorv32a
+read_sdc /home/p-brane/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/src/my_base.sdc
+report_checks -path_delay min_max -fields {slew trans net cap input_pin}
+report_tns
+report_wns
+```
+### my_base.sdc
+
+The my-base.sdc file is used to configure variables in the design. The definition and default values are described in the `~/openlane/configuration/README.md` file. The `my_base.sdc` file is use to setup with required variables and other parameters.
+```
+set ::env(CLOCK_PORT) clk
+set ::env(CLOCK_PERIOD) 12.000
+set ::env(SYNTH_DRIVING_CELL) sky130_fd_sc_hd__inv_8
+set ::env(SYNTH_DRIVING_CELL_PIN) Y
+set ::env(SYNTH_CAP_LOAD) 17.65
+create_clock [get_ports $::env(CLOCK_PORT)]  -name $::env(CLOCK_PORT)  -period $::env(CLOCK_PERIOD)
+set IO_PCT  0.2
+set input_delay_value [expr $::env(CLOCK_PERIOD) * $IO_PCT]
+set output_delay_value [expr $::env(CLOCK_PERIOD) * $IO_PCT]
+puts "\[INFO\]: Setting output delay to: $output_delay_value"
+puts "\[INFO\]: Setting input delay to: $input_delay_value"
+
+
+set clk_indx [lsearch [all_inputs] [get_port $::env(CLOCK_PORT)]]
+#set rst_indx [lsearch [all_inputs] [get_port resetn]]
+set all_inputs_wo_clk [lreplace [all_inputs] $clk_indx $clk_indx]
+#set all_inputs_wo_clk_rst [lreplace $all_inputs_wo_clk $rst_indx $rst_indx]
+set all_inputs_wo_clk_rst $all_inputs_wo_clk
+
+
+# correct resetn
+set_input_delay $input_delay_value  -clock [get_clocks $::env(CLOCK_PORT)] $all_inputs_wo_clk_rst
+#set_input_delay 0.0 -clock [get_clocks $::env(CLOCK_PORT)] {resetn}
+set_output_delay $output_delay_value  -clock [get_clocks $::env(CLOCK_PORT)] [all_outputs]
+
+# TODO set this as parameter
+set_driving_cell -lib_cell $::env(SYNTH_DRIVING_CELL) -pin $::env(SYNTH_DRIVING_CELL_PIN) [all_inputs]
+set cap_load [expr $::env(SYNTH_CAP_LOAD) / 1000.0]
+puts "\[INFO\]: Setting load to: $cap_load"
+set_load  $cap_load [all_outputs]
+```
+
+
 ### OpenLANE
 
-Start openlane
+The files supplied with vsdstdcelldesign name the inverter that we produces sky130_vsdinv in the library. If a different name is used then the sky130_vsd macros in the libraries need to renamed so that the `run_synthesis` tools can find the `sky130_jayinv`.
+
+To use the sky130_jayinv inverter, The libraries `sky130_fd_sc_hd__typical.lib`, `sky130_fd_sc_hd__slow.lib`, and `sky130_fd_sc_hd__fast.lib` in the src folder were modified with the new name `sky130_vsdinv` -> `sky130_jayinv`.
+
+The lectures use `docker run -it -v $(pwd):/openLANE_flow -v $PDK_ROOT:$PDK_ROOT -e PDK_ROOT=$PDK_ROOT -u $(id -u $USER):$(id -g $USER) openlane:rc2` to start docker. I was not able to get this to work properly and find that `docker` seems to work fine. Once `docker` is running then the follow commands can be issued to setup openlane for synthesis.
 
 ```
 docker
@@ -457,10 +513,121 @@ package require openlane 0.9
 prep -design picorv32a -tag 04-08_06-57 -overwrite
 set lefs [glob $::env(DESIGN_DIR)/src/*.lef]
 add_lefs -src $lefs
-run_synthesis
 ```
-![](assets/sky130_apd_workshop_day4_lab1_results-11316483.png)
+![](assets/sky130_apd_workshop_day4_lab1_results-3cc07023.png)
 
-run_synthesis does not show sky130_jayinv in the cell list so some debugging is needed.
+### Synthesis
+
+`run_synthesis`produces the following output.
+
+![](assets/sky130_apd_workshop_day4_lab1_results-b66c6a0b.png)
+
+### Static Timing Analysis
+
+Static timing analysis can be performed using `sta pre-sta.conf` from a terminal in the `/home/p-brane/Desktop/work/tools/openlane_working_dir/openlane/` directory. The setup slack violation at this point is -36.62.
+
+![](assets/sky130_apd_workshop_day4_lab1_results-cbd1d8d2.png)
+
+The hold slack is 0.24 and is not in violation.
+
+![](assets/sky130_apd_workshop_day4_lab1_results-e09e85b8.png)
+
+### Timing Violation Reduction
+
+The input capacitance of the `sky130_fd_sc_hd__inv_8` is 17.65 pF and this value is used in the `my_base.sdc` file for the load capacitance (SYNTH_CAP_LOAD). This value should be verified when trying to reduce timing violations.
+
+![](assets/sky130_apd_workshop_day4_lab1_results-cb2a6a27.png)
+
+Synthesis values can be changed interactively using the set command instead of modifying the my_base.sdc file. Some examples are shown below.
+
+```
+set ::env(SYNTH_DRIVING_CELL) sky130_fd_sc_hd__inv.8
+set ::env(SYNTH_DRIVING_CELL_PIN) Y
+set ::env(SYNTH_CAP_LOAD) 17.6
+set ::env(SYNTH_MAX_FANOUT) 4
+```
+The fan out can be reduced to reduce the slack. `echo $::env(SYNTH_MAX_FANOUT)` shows that the fanout is set 6. `set ::env(SYNTH_MAX_FANOUT) 4` was used to set the fan out to 4.
+
+![](assets/sky130_apd_workshop_day4_lab1_results-42650f3d.png)
+
+Reducing the fan out did not reduce the slack. Further, work will be need to reduce the slack so that is zero or positive.
+
+### Floorplan
+
+`run_floorplan` failed due not finding a source file.
+
+![](assets/sky130_apd_workshop_day4_lab1_results-24ecd312.png)
+
+The following procedure was used to manually create a floorplan.
+
+```
+init_floorplan
+place_io
+global_placement_or
+detailed_placement
+tap_decap_or
+detailed_placement
+gen_pdn
+run_routing
+```
+`init_floorplan`
+![](assets/sky130_apd_workshop_day4_lab1_results-446a4372.png)
+`place_io`
+![](assets/sky130_apd_workshop_day4_lab1_results-93214a69.png)
+
+`global_placement_or`
+![](assets/sky130_apd_workshop_day4_lab1_results-10021b96.png)
+
+`detailed_placement`
+![](assets/sky130_apd_workshop_day4_lab1_results-fe36af1e.png)
+
+`tap_decap_or`
+![](assets/sky130_apd_workshop_day4_lab1_results-60c36546.png)
+
+`detailed_placement`
+![](assets/sky130_apd_workshop_day4_lab1_results-b354f240.png)
+
+`gen_pdn`
+![](assets/sky130_apd_workshop_day4_lab1_results-7559b361.png)
+
+### Magic
+
+Magic was used to view the placement of the design using the command below.
+```
+magic -d XR -T /home/p-brane/Desktop/work/tools/openlane_working_dir/pdks/sky130A/libs.tech/magic/sky130A.tech lef read /home/p-brane/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/runs/04-08_06-57/tmp/merged.lef def read /home/p-brane/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/runs/04-08_06-57/results/placement/picorv32a.placement.def&
+```
+![](assets/sky130_apd_workshop_day4_lab1_results-96f2ad87.png)
+
+Finding the `skay130_jayinv ` cell turn out to be more difficult that I expected. Using the `s` I selected it and used `what` to lean more about it. `expand` was used to show the layout of the cell!
+
+![](assets/sky130_apd_workshop_day4_lab1_results-cb0405f8.png)
 
 ## Day 5
+
+### Power Distribution Network (PDN)
+
+The placement passed all legality checks. Then the `gen_pdn` command was used to generate the PDN.
+
+![](assets/sky130_apd_workshop_day5_lab1_results-81701dc6.png)
+
+![](assets/sky130_apd_workshop_day5_lab1_results-fcb41129.png)
+
+### Routing
+
+The `run_routing` command was used to generate the routing using the default settings. The routing completed with thee violations after running for 17.5 minutes.
+
+![](assets/sky130_apd_workshop_day5_lab1_results-4cb468ef.png)
+
+The `20-tritonRouting.drc` log file can be found at `/home/p-brane/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/runs/04-08_06-57/reports/routing/` and shows the DRC violations. These are shown below.
+
+```
+violation type: Short
+  srcs: frFakeVSS _05946_
+  bbox = ( 559.19, 470.32 ) - ( 559.33, 470.8 ) on Layer met1
+violation type: Short
+  srcs: VGND _05946_
+  bbox = ( 559.19, 470.32 ) - ( 559.33, 470.8 ) on Layer met1
+violation type: Short
+  srcs: VGND _05657_
+  bbox = ( 559.98, 470.32 ) - ( 560.12, 470.8 ) on Layer met2
+```
