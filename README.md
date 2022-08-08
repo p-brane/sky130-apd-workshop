@@ -733,3 +733,17 @@ Magic was used again to display the design for the design with CTS followed by r
 ### Parasitic Extraction
 
 Parasitic RC extraction can be performed on the routed design using the python3 program `SPEF_EXTRACTOR`. The extraction is combined with the routed `picorv32a.def` file to check for timing errors due to parasitics. The parasitic extraction flow wasn't performed due to time limitations.
+
+### References
+
+* [OpenLane](https://github.com/The-OpenROAD-Project/OpenLane)
+* [OpenLANE Workshop](https://gitlab.com/gab13c/openlane-workshop)
+* [OpenLANE Docs](https://openlane-docs.readthedocs.io/en/rtd-develop/#openlane-architecture)
+* [Skywater SKY130 PDK](https://antmicro-skywater-pdk-docs.readthedocs.io/en/latest/index.html)
+* [SkyWater / Google / Efabless SKY130 OpenMPW Resources](https://github.com/efabless/skywater-pdk-central)
+* [PicoRV32 - A Size-Optimized RISC-V CPU](https://github.com/YosysHQ/picorv32)
+* [Standard cell design and characterization using openlane flow](https://github.com/nickson-jose/vsdstdcelldesign)
+* [Magic VLSI Layout Tool](http://opencircuitdesign.com/magic/)
+[Magic User's Guide](http://opencircuitdesign.com/magic/commandref/commands.html)
+[Magic GitHub](https://github.com/RTimothyEdwards/magic)
+* [ngspice](https://ngspice.sourceforge.io/spdevs.html)
