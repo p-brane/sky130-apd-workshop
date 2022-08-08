@@ -3,11 +3,11 @@
 ![](assets/README-dff83cda.png)
 Image credit: efabless post on LinkedIn
 
-efabless sponsored a [workshop](https://www.vlsisystemdesign.com/advanced-physical-design-using-openlane-sky130/) on Advanced Physical Design using the openLANE open source toolchain, and the Skywater 130 nm Physical Design Kit (PDK). Google and Skywater have been working to make custom semiconductor design and processing open source. The course was produced and taught by VLSI System Design (VSD) -  Intelligent Assessment Technology.
+efabless sponsored a [workshop](https://www.vlsisystemdesign.com/advanced-physical-design-using-openlane-sky130/) on Advanced Physical Design using the openLANE open source toolchain, and the Skywater 130 nm Physical Design Kit (PDK). Google and Skywater have been working to make custom semiconductor design and processing open source. The course was produced and taught by VLSI System Design (VSD) -  Intelligent Assessment Technology (IAT).
 
 The workshop was held August 2 to 6 and each day begins with an Q&A session at 10:30 AM ET over Zoom. The course lectures were recorded and made available on the VSD learning platform. The platform also provided a compute instance containing all the tools and PDK library all setup to use.
 
-The platform was very responsive for both the lecture recordings and running the labs to learn the design toolchain. The workshop also provided a Slack workspace to interact with other students and get questions answered. The instructors were very good about responding to questions to help solve problems with simulations. The subjects covered each day are shown below. Each module had exams too.
+The platform was very responsive for both the lecture recordings and running the labs to learn the design toolchain. The workshop also provided a Slack workspace to interact with other students and get questions answered. The instructors were very good about responding to questions to help solve problems with simulations. The subjects covered each day are shown below. Each module also had exams.
 
 * Day 1 - Inception of open-source EDA, OpenLANE and Sky130 PDK
 * Day 2 - Good floorplan vs bad floorplan and introduction to library cells
@@ -17,7 +17,7 @@ The platform was very responsive for both the lecture recordings and running the
 
 The first three days introduce you to the openLANE toolchain and the PDK. On the last two days, we replaced a standard cell inverter with a custom cell in the picorv32a design to demonstrate how to add a custom cell to an existing design. The picorv32a is a [Size-Optimized RISC-V CPU](https://github.com/YosysHQ/picorv32) core that executes the RISC-V RV32IMC Instruction Set. The sections below describe show my results produced from the workshop labs. The workshop is intense and required around 10 to 12 hrs/day to work through the lectures, labs and exams as this was my first introduction to an ASIC design toolchain.
 
-There wasn't enough time to finish the timing optimization or resolve the placement Design Rule Check (DRC) errors. Fortunately, the tools can be downloaded and installed on a local computer and completed offline. Designs can be submitted to the Google/Skywater Multi-Project Wafer (MPW) shuttle. The submission deadline is Sept 12, 2022.
+There wasn't enough time to finish the timing optimization. Fortunately, the tools can be downloaded and installed on a local computer and completed offline. Designs can be submitted to the Google/Skywater Multi-Project Wafer (MPW) shuttle. The submission deadline is Sept 12, 2022.
 
 ## Day 1
 
@@ -26,7 +26,7 @@ OpenLANE integrates a tool flow into a system that takes in a design and a PDK, 
 ![](assets/README-7a918a51.png)
 Image credit: [Openlane-docs: Openlane Acrheture](https://openlane-docs.readthedocs.io/en/rtd-develop/#openlane-architecture)
 
-The design flow sequence used for the labs and openLANE is summarized below and followed up trough magic layout.
+The design flow sequence used for the labs and openLANE is summarized below and was followed up trough magic layout.
 
 * synthesis
 * floorplan
@@ -41,7 +41,7 @@ The design flow sequence used for the labs and openLANE is summarized below and 
 
 ### Start openLANE
 
-The flowing sequence is the is used to run an interactive OpenLANE flow to synthesis the picorv32a design.
+The following sequence was used to run an interactive OpenLANE flow to synthesis the picorv32a design.
 
 ```
 cd ~/Desktop/work/tools/openlane_working_dir/openlane
@@ -51,12 +51,14 @@ package require openlane 0.9
 prep -design picorv32a
 run_synthesis
 ```
-The figure below shows the first step.
+The figure below shows the output of the first step.
 
 * ![](assets/sky130_pd_lab_01_noted-da8234e6.png)
 * ![](assets/sky130_pd_lab_01_noted-09e8873b.png)
 
 ### Synthesis
+
+The figure below show the end of the output from `run_synthesis`
 
 * ![](assets/sky130_pd_lab_01_noted-5d72c0ab.png)
 
@@ -71,11 +73,11 @@ The next step is to create a floorplan for the picorv32a design.
 
 `run_floorplan`
 
-The details of the configuration variable are located in '/home/p-brane/Desktop/work/tools/openlane_working_dir/openlane/configuration/README.md‌‌' under the Floorplanning section. Each variable is shown, defined and a default value is defined. Some of the floorplanning variable are shown in the figure below.
+The details of the configuration variable are located in `/home/p-brane/Desktop/work/tools/openlane_working_dir/openlane/configuration/README.md‌‌` under the Floorplanning section. Each variable is shown, defined, and a default value is defined. Some of the floorplanning variable are shown in the figure below.
 
 ![](assets/sky130_apd_workshop_day2_lab1_results-0793bd3d.png)
 
-The default values can be change in the floorplan.tcl file. Some of the floorplan.tcl is shown in the figure below.
+The default values can be changed in the floorplan.tcl file. Some of the floorplan.tcl is shown in the figure below.
 
 ![](assets/sky130_apd_workshop_day2_lab1_results-f2256850.png)
 
@@ -84,15 +86,15 @@ The floorplan.tch file places the horizontal metal on layer 3 which is metal4 an
 ![](assets/sky130_apd_workshop_day2_lab1_results-6f24db54.png)
 Image credit: [Skywater PDK Process Stack Diagram](https://skywater-pdk.readthedocs.io/en/main/rules/assumptions.html#process-stack-diagram)
 
-The run_floorplan runs for a while and indicate a successful completion.
+The `run_floorplan` runs for a while and indicate a successful completion.
 
 ![](assets/sky130_apd_workshop_day2_lab1_results-20b5e7e9.png)
 
-The log file ioPlaer.log from the floorplan are found at `/home/p-brane/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/runs/03-08_02-33/logs/floorplan/`
+The log file `ioPlaer.log` from the floorplan are found at `/home/p-brane/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/runs/03-08_02-33/logs/floorplan/`
 
 ![](assets/sky130_apd_workshop_day2_lab1_results-c604f3c5.png)
 
-The ioPlacer.log file contains the following info.
+The `ioPlacer.log` file contains the following info.
 
 ```
 ‌‌OpenROAD 0.9.0 1415572a73
@@ -116,21 +118,21 @@ Random pin placement
 RandomMode Even
 ```
 
-The default config.tcl and default sky130A_sky130_fd_sc_hd_config.tcl file were used for this floorplan run. The configuration files are located at `/home/p-brane/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/`
+The default `config.tcl` and default sky130A_sky130_fd_sc_hd_config.tcl file were used for this floorplan run. The configuration files are located at `/home/p-brane/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/`
 
 ![](assets/sky130_apd_workshop_day2_lab1_results-70d94a3c.png)
 
-The picov32a.def file contains the floorplan results and is located at `/home/p-brane/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/runs/03-08_06-01/results/floorplan/`. The total die area is 660685 by 671405 units and can be converter to microns by dividing 1000 (1 micron = 1000 units).
+The `picov32a.def` file contains the floorplan results and is located at `/home/p-brane/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/runs/03-08_06-01/results/floorplan/`. The total die area is 660685 by 671405 units and can be converter to microns by dividing 1000 (1 micron = 1000 units).
 
 ![](assets/sky130_apd_workshop_day2_lab1_results-9b1ceaef.png)
 
 ### Floorplan Layout with Magic
 
-Magic will display the floorplan layout graphically. Magic is invoked as using the following command in a new terminal.
+`Magic` will display the floorplan layout graphically. `Magic` is invoked as using the following command in a new terminal.
 
 `magic -T /home/p-brane/Desktop/work/tools/openlane_working_dir/pdks/sky130A/libs.tech/magic/sky130A.tech lef read /home/p-brane/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/runs/03-08_06-01/tmp/merged.lef def read /home/p-brane/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/runs/03-08_06-01/results/floorplan/picov32a.floorplan.def &`
 
-The sky130A.tech file describes the Skywater 130 nm process and the picov32a.floorplan.def file contain the floorplan for the picorv32a design generated by the run_floorplan script.
+The `sky130A.tech` file describes the Skywater 130 nm process and the `picov32a.floorplan.def` file contain the floorplan for the picorv32a design generated by the `run_floorplan` command.
 
 ![](assets/sky130_apd_workshop_day2_lab1_results-e2cbacff.png)
 ![](assets/sky130_apd_workshop_day2_lab1_results-8e63b358.png)
@@ -139,19 +141,19 @@ The Layout appears.
 ![](assets/sky130_apd_workshop_day2_lab1_results-d4123476.png)
 ![](assets/sky130_apd_workshop_day2_lab1_results-d33013ea.png)
 
-To zoom, left mouse click and then right mouse click to form a rectangle and press `z` to zoom. Hover over a cell and press 's' to select and the tkcon window will show the status of the cell. The standard cells are located in the lower left corner.
+To zoom, left mouse click and then right mouse click to form a rectangle and press `z` to zoom. Hover over a cell and press 's' to select and the `tkcon` window will show the status of the cell. The standard cells are located in the lower left corner.
 
 ![](assets/sky130_apd_workshop_day2_lab1_results-57dfeee4.png)
 
-An error occurred so run_synthesis and run_placement error run again.
+An error occurred so `run_synthesis` and `run_placement` error run again.
 
 ![](assets/sky130_apd_workshop_day2_lab1_results-9c08a1e3.png)
 
-The magic command becomes
+The `Magic` command becomes
 
 `magic -T /home/p-brane/Desktop/work/tools/openlane_working_dir/pdks/sky130A/libs.tech/magic/sky130A.tech lef read /home/p-brane/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/runs/04-08_06-57/tmp/merged.lef def read /home/p-brane/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/runs/04-08_06-57j/results/floorplan/picorv32a.floorplan.def &`
 
-Magic now shows the status of the standard cells, there may still be an error.
+`Magic` now shows the status of the standard cells, there may still be an error.
 
 ![](assets/sky130_apd_workshop_day2_lab1_results-5ed1fb95.png)
 
@@ -166,14 +168,14 @@ To place the standard cells run 'run_placement'.
 
 ### CMOS Inverter Standard Cell
 
-Download the vsdstdcelldesign from GitHub to the openlane directory. This can be accomplished using the following commands
+Download the `vsdstdcelldesign` from GitHub to the openlane directory. This can be accomplished using the following commands
 
 `cd /home/Desktop/work/tools/openlane_working_dir/openlane`
 `git clone https://github.com/nickson-jose/vsdstdcelldesign.git`
 
 ![](assets/sky130_apd_workshop_day3_lab1_results-34b60ffb.png)
 
-Move into the vsdstdcelldesign directory and copy the sky130A.tech file to the vsdstdcelldesign directory
+Move into the `vsdstdcelldesign` directory and copy the sky130A.tech file to the `vsdstdcelldesign` directory
 
 `cd vsdstdcelldesign`
 `cp /home/Desktop/work/tools/openlane_working_dir/pdks/sky130A/libs.tech/magic/sly130A.tech  .`
@@ -182,13 +184,13 @@ Move into the vsdstdcelldesign directory and copy the sky130A.tech file to the v
 
 ### Inverter Layout in Magic
 
-Run magic using `magic -d XR -T sky130A.tech sky130_inv.mag&` The -d XR setting use a different graphics system and produces a clearer window.
+Run `Magic` using `magic -d XR -T sky130A.tech sky130_inv.mag&` The -d XR setting use a different graphics system and produces a clearer image.
 
 ![](assets/sky130_apd_workshop_day3_lab1_results-b1507618.png)
 
 ### Extracted SPICE Netlist
 
-To extract a spice netlist, then the parasitic capacitance and resistance.
+To extract a spice netlist, use the `extract all` and `ext2spice' commands as shown below.
 
 ```
 extract all
@@ -198,11 +200,12 @@ ext2spice
 
 ![](assets/sky130_apd_workshop_day3_lab1_results-810208a2.png)
 
-This generates teh sky130_inv.ext and sky130_inv.spice files.
+This generates the `sky130_inv.ext` and `sky130_inv.spice` files.
 
 ![](assets/sky130_apd_workshop_day3_lab1_results-2431da87.png)
 
-sky130_inv.ext file
+`sky130_inv.ext` file
+
 ```
 timestamp 1600540370
 version 8.3
@@ -230,7 +233,9 @@ subcap "A" -45.9469
 subcap "VPWR" -243.219
 subcap "VGND" -109.355
 ```
-sky130_inv.spice file
+
+`sky130_inv.spice` file
+
 ```
 * SPICE3 file created from sky130_inv.ext - technology: sky130A
 
@@ -248,7 +253,7 @@ C4 VPWR VGND 0.59fF
 ```
 ### Spice Deck
 
-Update the sky130_inv.spice file to use the correct scaling factor and models. From the tkcon the root cell box is 0.01 x 0.01 microns. The scale is change to `.option scale =0.01u'
+Update the `sky130_inv.spice` file to use the correct scaling factor and models. From the `tkcon` the root cell box is 0.01 x 0.01 microns. The scale is change om the `.option` command as follows: `.option scale =0.01u'
 
 ![](assets/sky130_apd_workshop_day3_lab1_results-c74458c3.png)
 
@@ -289,11 +294,13 @@ Then plot the results `plot y vs time a`
 
 ![](assets/sky130_apd_workshop_day3_lab1_results-d200084f.png)
 
+The rise and fall times, and propagation delay can be then found from the plot. This measurement wasn't performed due to time limitations.
+
 ## Day 4
 
 ### Inverter Cell
 
-Go to the vsdstdcelldesign directory at `/home/p-brane/Desktop/work/tools/openlane_working_dir/openlane/vsdstdcelldesign` and run Magic on the for the inverter.
+Go to the `vsdstdcelldesign` directory at `/home/p-brane/Desktop/work/tools/openlane_working_dir/openlane/vsdstdcelldesign` and run `Magic` on the for the inverter.
 
 ‌`magic -d XR -T sky130A.tech sky130_inv.mag&`
 
@@ -318,7 +325,7 @@ met4 Y 0.46 0.92
 met5 X 1.70 3.40
 met5 Y 1.70 3.40
 ```
-The default grid is 0.01 um x 0.01 um as shown in the tkcon above. It can be changed to match the tracks.info grid for the li (locali) layer. Using `grid 0.46um 0.34ym 0.23um 0.17um`
+The default grid is 0.01 um x 0.01 um as shown in the `tkcon` above. It can be changed to match the `tracks.info` grid for the li (locali) layer. Using `grid 0.46um 0.34ym 0.23um 0.17um`
 
 ![](assets/sky130_apd_workshop_day4_lab1_results-1d1145c2.png)
 
@@ -328,39 +335,42 @@ The alignment of the cell elements with the grid can be verified.
 
 ### Assign Ports for LEF File Generation
 
-To create aa lef files the ports of the need to be defined for pins in the lef macro
+To create a `lef` file, the ports of the inverter need to be defined as pins in the `lef` macro.
 
 ![](assets/sky130_apd_workshop_day4_lab1_results-b04a1f5d.png)
 
-Define the input port A and set the class to input and use to signal.
+Define the input port A and set the `class` to input and `use` to signal.
 
 ![](assets/sky130_apd_workshop_day4_lab1_results-549c9921.png)
 ![](assets/sky130_apd_workshop_day4_lab1_results-a915e874.png)
 
-Define output port Y and set the class to output and use to signal.
+Define output port Y and set the `class` to output and `use` to signal.
 
 ![](assets/sky130_apd_workshop_day4_lab1_results-7cdebd23.png)
 ![](assets/sky130_apd_workshop_day4_lab1_results-01e6c032.png)
 
-Define VPWR port and set the class to input and use to power.
+Define VPWR port and set the `class` to input and `use` to power.
 
 ![](assets/sky130_apd_workshop_day4_lab1_results-295a3862.png)
 ![](assets/sky130_apd_workshop_day4_lab1_results-840c3dca.png)
 
-Define VGND port and set the class to input and use to ground.
+Define VGND port and set the `class` to input and `use` to ground.
 
 ![](assets/sky130_apd_workshop_day4_lab1_results-42734cd2.png)
 ![](assets/sky130_apd_workshop_day4_lab1_results-19bf55d3.png)
 
 Save the file: `save sky130_jayinv.mag`
 ![](assets/sky130_apd_workshop_day4_lab1_results-aa747cf7.png)
+
 Open the new file using `magic -d XR -T sky130A.tech sky130_jayinv.mag&`
 
-### LEF FIle
-Use `lef write` to generate a lef file
+### LEF File
+
+Use `lef write` to generate a `lef` file
+
 ![](assets/sky130_apd_workshop_day4_lab1_results-3b3b5d51.png)
 
-The generated sky130_jayinv.lef file is shown below
+The generated `sky130_jayinv.lef` file is shown below
 ```
 VERSION 5.7 ;
   NOWIREEXTENSIONATPIN ON ;
@@ -445,7 +455,7 @@ cp sky130_jayinv.lef /home/p-brane/Desktop/work/tools/openlane_working_dir/openl
 ```
 ![](assets/sky130_apd_workshop_day4_lab1_results-0e84de67.png)
 
-Copy the sky130 libraries to the picrv32a/src directory
+Copy the sky130 libraries to the `picrv32a/src` directory
 
 ```
 cd /home/p-brane/Desktop/work/tools/openlane_working_dir/openlane/vsdstdcelldesign/libs/
@@ -455,7 +465,7 @@ cp sky130_fd_sc_hd__* /home/p-brane/Desktop/work/tools/openlane_working_dir/open
 
 ### Config.tcl
 
-`config.tcl` is used to configure openlane to use the `picorv32a` design, the `sky130_fd_sc_hd` libraries, define the clock and clock period, and use custom cells. Modify the config.tcl to include the copied libraries at  `/home/p-brane/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/config.tcl`
+`config.tcl` is used to configure openlane to use the `picorv32a` design, the `sky130_fd_sc_hd` libraries, define the clock and clock period, and use custom cells. Modify the `config.tcl` to include the copied libraries at  `/home/p-brane/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/config.tcl`
 The modified file is shown below. `LIB_MIN` was replaced with `LIB_FASTEST`, and `LIB_MAX` was replace with `LIB_SLOWEST`.
 
 ```
@@ -487,7 +497,7 @@ if { [file exists $filename] == 1} {
 
 ### pre_sta.conf
 
-The `pre_sta.conf` static timing configuration file is used to configure the Static Timing Analysis tool STA. `sta pre_sta.conf` are uses in another terminal. `sta pre_sta.conf` must re-run every time a new `run_synthesis` is performed so that `sta` analyses the changes to the synthesis file `picorv32.synthesis.v`.
+The `pre_sta.conf` static timing configuration file is used to configure the Static Timing Analysis tool STA. `sta pre_sta.conf` are used in another terminal. `sta pre_sta.conf` must re-run every time a new `run_synthesis` is performed so that `sta` analyses the changes to the synthesis file `picorv32.synthesis.v`.
 
 `cd /home/p-brane/Desktop/work/tools/openlane_working_dir/openlane/` and rename the `sta.conf` file to `pre-sta.conf` using `mv sta.conf pre_sta.conf`. Edit the pre_sta.conf file as shown below to add the links to the libraries and the verilog file.
 ```
@@ -540,7 +550,7 @@ set_load  $cap_load [all_outputs]
 
 ### OpenLANE
 
-The files supplied from the [vsdstdcelldesign](https://github.com/nickson-jose/vsdstdcelldesign) repository contain a custom inverter that will be used in the `picorv32a` design. The inverter is called `sky130_vsdinv` in the libraries. If a different name is used then the `sky130_vsdinv` macro must be renamed in the libraries so that the `run_synthesis` tools can find the `sky130_jayinv` and I have named it.
+The files supplied from the [vsdstdcelldesign](https://github.com/nickson-jose/vsdstdcelldesign) repository contain a custom inverter that will be used in the `picorv32a` design. The inverter is called `sky130_vsdinv` in the libraries. If a different name is used then the `sky130_vsdinv` macro must be renamed in the libraries so that the `run_synthesis` tools can find the `sky130_jayinv` as I have named it.
 
 To use the sky130_jayinv inverter, The libraries `sky130_fd_sc_hd__typical.lib`, `sky130_fd_sc_hd__slow.lib`, and `sky130_fd_sc_hd__fast.lib` in the src folder were modified with the new name `sky130_vsdinv` -> `sky130_jayinv`.
 
@@ -646,7 +656,7 @@ run_routing
 
 ### Magic
 
-Magic was used to view the placement of the design using the command below.
+`Magic` was used to view the placement of the design using the command below.
 ```
 magic -d XR -T /home/p-brane/Desktop/work/tools/openlane_working_dir/pdks/sky130A/libs.tech/magic/sky130A.tech lef read /home/p-brane/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/runs/04-08_06-57/tmp/merged.lef def read /home/p-brane/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/runs/04-08_06-57/results/placement/picorv32a.placement.def&
 ```
@@ -713,7 +723,7 @@ magic -d XR -T /home/p-brane/Desktop/work/tools/openlane_working_dir/pdks/sky130
 
 ![](assets/sky130_apd_workshop_day5_lab1_results-4ab33ad8.png)
 
-Magic was used again to display the design for the design with CTS followed by routing.
+Magic was used again to display the design for the design with CTS followed by routing. The routing here has no DRC violations and a slack violation of -0.2 ns. This can be further improved iteratively with gate replacements and STA analysis.
 
 ![](assets/sky130_apd_workshop_day5_lab1_results-c847cb2e.png)
 
