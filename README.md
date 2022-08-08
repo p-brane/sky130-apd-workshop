@@ -1,12 +1,46 @@
-# sky130-apd-workshop
+# Skywater 130n Advanced Process Design Workshop
 
-Results for Jay Morreale for the VSD Advanced Physical Design Course held Aug 2-6.
+![](assets/README-dff83cda.png)
+Image credit: efabless post on LinkedIn
 
-[TOC]
+efabless sponsored a [workshop](https://www.vlsisystemdesign.com/advanced-physical-design-using-openlane-sky130/) on Advanced Physical Design using the openLANE open source toolchain, and the Skywater 130 nm Physical Design Kit (PDK). Google and Skywater have been working to make custom semiconductor design and processing open source. The course was produced and taught by VLSI System Design (VSD) -  Intelligent Assessment Technology.
+
+The workshop was held August 2 to 6 and each day begins with an Q&A session at 10:30 AM ET over Zoom. The course lectures were recorded and made available on the VSD learning platform. The platform also provided a compute instance containing all the tools and PDK library all setup to use.
+
+The platform was very responsive for both the lecture recordings and running the labs to learn the design toolchain. The workshop also provided a Slack workspace to interact with other students and get questions answered. The instructors were very good about responding to questions to help solve problems with simulations. The subjects covered each day are shown below. Each module had exams too.
+
+* Day 1 - Inception of open-source EDA, OpenLANE and Sky130 PDK
+* Day 2 - Good floorplan vs bad floorplan and introduction to library cells
+* Day 3 - Design library cell using Magic Layout and ngspice characterization
+* Day 4 - Pre-layout timing analysis and importance of good clock tree
+* Day 5 - Final steps for RTL2GDS using tritonRoute and openSTA
+
+The first three days introduce you to the openLANE toolchain and the PDK. On the last two days, we replaced a standard cell inverter with a custom cell in the picorv32a design to demonstrate how to add a custom cell to an existing design. The picorv32a is a [Size-Optimized RISC-V CPU](https://github.com/YosysHQ/picorv32) core that executes the RISC-V RV32IMC Instruction Set. The sections below describe show my results produced from the workshop labs. The workshop is intense and required around 10 to 12 hrs/day to work through the lectures, labs and exams as this was my first introduction to an ASIC design toolchain.
+
+There wasn't enough time to finish the timing optimization or resolve the placement Design Rule Check (DRC) errors. Fortunately, the tools can be downloaded and installed on a local computer and completed offline. Designs can be submitted to the Google/Skywater Multi-Project Wafer (MPW) shuttle. The submission deadline is Sept 12, 2022.
 
 ## Day 1
 
+OpenLANE integrates a tool flow into a system that takes in a design and a PDK, and generated a GDSII output. The process can be automated or interactive. The figure below shows the tools and the tool flow for openLANE.
+
+![](assets/README-7a918a51.png)
+Image credit: [Openlane-docs: Openlane Acrheture](https://openlane-docs.readthedocs.io/en/rtd-develop/#openlane-architecture)
+
+The design flow sequence used for the labs and openLANE is summarized below and followed up trough magic layout.
+
+* synthesis
+* floorplan
+* placement
+* clock tree synthesis
+* routing
+* magic layout
+* magic spice export
+* magic DRC
+* netgen DRC
+* magic antenna check
+
 ### Start openLANE
+
 The flowing sequence is the is used to run an interactive OpenLANE flow to synthesis the picorv32a design.
 
 ```
@@ -48,6 +82,7 @@ The default values can be change in the floorplan.tcl file. Some of the floorpla
 The floorplan.tch file places the horizontal metal on layer 3 which is metal4 and the vertical metal on layer 4 which is metal5. The metal layer stack is shown in the figure below.
 
 ![](assets/sky130_apd_workshop_day2_lab1_results-6f24db54.png)
+Image credit: [Skywater PDK Process Stack Diagram](https://skywater-pdk.readthedocs.io/en/main/rules/assumptions.html#process-stack-diagram)
 
 The run_floorplan runs for a while and indicate a successful completion.
 
@@ -395,8 +430,11 @@ END sky130_jayinv
 END LIBRARY
 ```
 
-### SRC File Setup
-Copy the provided `my_base.sdc` file from the `vsdstdcelldesign/extras` and the `sky130_jayinv.lef` to the `picorv32a/src` directory. Copy the `vsdstdcelldesign/extras/sta.conf` file to the openlane directory.
+### Static Timing Analysis File Setup
+
+In this lab, the `sky130_jayinv` will replace the standard cell inverter used in the picorv32a design to demonstrate how to add a custom cell to and existing design. The picorv32a is a [Size-Optimized RISC-V CPU](https://github.com/YosysHQ/picorv32) core that executes the RISC-V RV32IMC Instruction Set.
+
+Copy the provided `my_base.sdc` file from the `vsdstdcelldesign/extras` directory and the `sky130_jayinv.lef` to the `picorv32a/src` directory. Copy the `vsdstdcelldesign/extras/sta.conf` file to the openlane directory.
 
 ```
 cd /home/p-brane/Desktop/work/tools/openlane_working_dir/openlane/vsdstdcelldesign/extras/
@@ -417,8 +455,8 @@ cp sky130_fd_sc_hd__* /home/p-brane/Desktop/work/tools/openlane_working_dir/open
 
 ### Config.tcl
 
-Modify the config.tcl to include the copied libraries at  `/home/p-brane/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/config.tcl`
-The modified file is shown below. LIB_MIN was replaced with LIB_FASTEST, and LIB_MAX was replace with LIB_SLOWEST.
+`config.tcl` is used to configure openlane to use the `picorv32a` design, the `sky130_fd_sc_hd` libraries, define the clock and clock period, and use custom cells. Modify the config.tcl to include the copied libraries at  `/home/p-brane/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/config.tcl`
+The modified file is shown below. `LIB_MIN` was replaced with `LIB_FASTEST`, and `LIB_MAX` was replace with `LIB_SLOWEST`.
 
 ```
 # Design
@@ -449,7 +487,9 @@ if { [file exists $filename] == 1} {
 
 ### pre_sta.conf
 
-The `pre_sta.conf` static timing configuration file must be setup. `cd /home/p-brane/Desktop/work/tools/openlane_working_dir/openlane/` and rename the `sta.conf` file to `pre-sta.conf` using `mv sta.conf pre_sta.conf`. Edit the pre_sta.conf file as shown below to add the links to the libraries and the verilog file.
+The `pre_sta.conf` static timing configuration file is used to configure the Static Timing Analysis tool STA. `sta pre_sta.conf` are uses in another terminal. `sta pre_sta.conf` must re-run every time a new `run_synthesis` is performed so that `sta` analyses the changes to the synthesis file `picorv32.synthesis.v`.
+
+`cd /home/p-brane/Desktop/work/tools/openlane_working_dir/openlane/` and rename the `sta.conf` file to `pre-sta.conf` using `mv sta.conf pre_sta.conf`. Edit the pre_sta.conf file as shown below to add the links to the libraries and the verilog file.
 ```
 set_cmd_units -time ns -capacitance pF -current mA -voltage V -resistance kOhm -distance um
 read_liberty -min /home/p-brane/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/src/sky130_fd_sc_hd__fast.lib
@@ -457,13 +497,14 @@ read_liberty -max /home/p-brane/Desktop/work/tools/openlane_working_dir/openlane
 read_verilog /home/p-brane/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/runs/04-08_06-57/results/synthesis/picorv32a.synthesis.v
 link_design picorv32a
 read_sdc /home/p-brane/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/src/my_base.sdc
-report_checks -path_delay min_max -fields {slew trans net cap input_pin}
+report_checks -path_delay min_max -fields {slew trans net cap input_pin} -digits 4
 report_tns
 report_wns
 ```
 ### my_base.sdc
 
-The my-base.sdc file is used to configure variables in the design. The definition and default values are described in the `~/openlane/configuration/README.md` file. The `my_base.sdc` file is use to setup with required variables and other parameters.
+The `my-base.sdc` file is used to configure variables in the design, and is referenced by the `pre_sta.conf` file. The definition and default values are described in the `~/openlane/configuration/README.md` file.
+
 ```
 set ::env(CLOCK_PORT) clk
 set ::env(CLOCK_PERIOD) 12.000
@@ -499,11 +540,11 @@ set_load  $cap_load [all_outputs]
 
 ### OpenLANE
 
-The files supplied with vsdstdcelldesign name the inverter that we produces sky130_vsdinv in the library. If a different name is used then the sky130_vsd macros in the libraries need to renamed so that the `run_synthesis` tools can find the `sky130_jayinv`.
+The files supplied from the [vsdstdcelldesign](https://github.com/nickson-jose/vsdstdcelldesign) repository contain a custom inverter that will be used in the `picorv32a` design. The inverter is called `sky130_vsdinv` in the libraries. If a different name is used then the `sky130_vsdinv` macro must be renamed in the libraries so that the `run_synthesis` tools can find the `sky130_jayinv` and I have named it.
 
 To use the sky130_jayinv inverter, The libraries `sky130_fd_sc_hd__typical.lib`, `sky130_fd_sc_hd__slow.lib`, and `sky130_fd_sc_hd__fast.lib` in the src folder were modified with the new name `sky130_vsdinv` -> `sky130_jayinv`.
 
-The lectures use `docker run -it -v $(pwd):/openLANE_flow -v $PDK_ROOT:$PDK_ROOT -e PDK_ROOT=$PDK_ROOT -u $(id -u $USER):$(id -g $USER) openlane:rc2` to start docker. I was not able to get this to work properly and find that `docker` seems to work fine. Once `docker` is running then the follow commands can be issued to setup openlane for synthesis.
+The lectures use `docker run -it -v $(pwd):/openLANE_flow -v $PDK_ROOT:$PDK_ROOT -e PDK_ROOT=$PDK_ROOT -u $(id -u $USER):$(id -g $USER) openlane:rc2` to start docker. I was not able to get this to work properly and find that `docker` seems to work fine. Once `docker` is running then the follow commands can be issued to setup openlane for synthesis. The last two commands in the sequence enable openlane to use the custom inverter.
 
 ```
 docker
@@ -513,11 +554,12 @@ prep -design picorv32a -tag 04-08_06-57 -overwrite
 set lefs [glob $::env(DESIGN_DIR)/src/*.lef]
 add_lefs -src $lefs
 ```
+
 ![](assets/sky130_apd_workshop_day4_lab1_results-3cc07023.png)
 
 ### Synthesis
 
-`run_synthesis`produces the following output.
+`run_synthesis` produces the following output.
 
 ![](assets/sky130_apd_workshop_day4_lab1_results-b66c6a0b.png)
 
@@ -533,11 +575,11 @@ The hold slack is 0.24 and is not in violation.
 
 ### Timing Violation Reduction
 
-The input capacitance of the `sky130_fd_sc_hd__inv_8` is 17.65 pF and this value is used in the `my_base.sdc` file for the load capacitance (SYNTH_CAP_LOAD). This value should be verified when trying to reduce timing violations.
+`my_base.sdc` can be updated to change default settings on variables used for the synthesis. The input capacitance of the `sky130_fd_sc_hd__inv_8` is 17.65 pF as defined in the `sky130_fd_sc_hd__typical.lib` library. This value was used to seet the `SYNTH_CAP_LOAD` value is the `my_base.sdc`. These value should be verified and updated when a different library is used and when trying to reduce timing violations.
 
 ![](assets/sky130_apd_workshop_day4_lab1_results-cb2a6a27.png)
 
-Synthesis values can be changed interactively using the set command instead of modifying the my_base.sdc file. Some examples are shown below.
+Synthesis variable values can be read and can be changed interactively using the set command instead of modifying the `my_base.sdc` file. Some examples are shown below.
 
 ```
 set ::env(SYNTH_DRIVING_CELL) sky130_fd_sc_hd__inv.8
@@ -545,11 +587,24 @@ set ::env(SYNTH_DRIVING_CELL_PIN) Y
 set ::env(SYNTH_CAP_LOAD) 17.6
 set ::env(SYNTH_MAX_FANOUT) 4
 ```
-The fan out can be reduced to reduce the slack. `echo $::env(SYNTH_MAX_FANOUT)` shows that the fanout is set 6. `set ::env(SYNTH_MAX_FANOUT) 4` was used to set the fan out to 4.
+
+The `SYNTH_MAX_FANOUT` defines the gate fanout. Reduing the fanout should reduce the slack. `echo $::env(SYNTH_MAX_FANOUT)` shows that the default fanout is 6. The fanout `set ::env(SYNTH_MAX_FANOUT) 4` was used to set the fanout to 4.
 
 ![](assets/sky130_apd_workshop_day4_lab1_results-42650f3d.png)
 
-Reducing the fan out did not reduce the slack. Further, work will be need to reduce the slack so that is zero or positive.
+Reducing the fanout did not reduce the slack. Further, work will be needed to reduce the slack so that it is zero or positive. The process involves changing gates on slow nets by replacing cells using the `replace_cell instance lib_cell` command in STA, rerunning synthesis (`run_synthesis`), and re-running `sta pre_sta.conf` to see the changes in slack timing violations (if any).
+
+In STA, net `_11643_` has a high delay. It is driven with a `sky130_fd_sc_hd__or4_2` gate. To reduce the delay it will be replaced with the `sky130_fd_sc_hd__or4_4`which is larger and should be faster. The cell is replaced using `replace_cell _14481_ sky130_fd_sc_hd__or4_4`.
+
+![](assets/sky130_apd_workshop_day4_lab1_results-6f6df258.png)
+
+![](assets/sky130_apd_workshop_day4_lab1_results-549c9486.png)
+
+This reduced the slack slightly.
+
+![](assets/sky130_apd_workshop_day4_lab1_results-5c6a6b70.png)
+
+When the timing slack has been reduced to zero the interactively modified Verilog file can be written to a file and used in following steps. In STA, use `write verilog /home/p-brane/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/runs/04-08_06-57/results/synthesis/picorv32a.synthesis.v` to save the file. It would be wise to backup the file before writing over it.
 
 ### Floorplan
 
@@ -601,6 +656,19 @@ Finding the `skay130_jayinv ` cell turn out to be more difficult that I expected
 
 ![](assets/sky130_apd_workshop_day4_lab1_results-cb0405f8.png)
 
+### Clock Tree Synthesis (CTS)
+
+`run_cts` starts the clock tree synthesis and it completed successfully, and has a slack violation. The slack violation are now much lower at -0.2 ns compared with the slack violation of -32.62 ns reported from the initial static timing analysis. `echo $::env(CTS_TOLERANCE)` can be used to display the Quality of Results (QoR) factor used for the CTS run. The default value is 100. Higher values will produce lower slack values and will require more time to process. OpenROAD and openSTA are used to analyze the timing.
+
+![](assets/sky130_apd_workshop_day4_lab1_results-22c2822e.png)
+![](assets/sky130_apd_workshop_day4_lab1_results-3cabfcf3.png)
+
+The `run_cts` configuration file `cts.tcl` is located at `/home/p-brane/Desktop/work/tools/openlane_working_dir/openlane/scripts/tcl_commands/` and defines the clock nets and clock timing related variables.
+
+# OpenRoad and OpenSTA
+
+The OpenROAD and OpenSTA timing analysis labs weren't completed due to time limitations.
+
 ## Day 5
 
 ### Power Distribution Network (PDN)
@@ -633,7 +701,7 @@ violation type: Short
 
 ### Magic
 
-The following command was used to plot the routing in Magic.
+The following command was used to display the design with routing but without the CTS in Magic.
 
 ```
 magic -d XR -T /home/p-brane/Desktop/work/tools/openlane_working_dir/pdks/sky130A/libs.tech/magic/sky130A.tech lef read /home/p-brane/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/runs/04-08_06-57/tmp/merged.lef def read /home/p-brane/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/runs/04-08_06-57/results/routing/picorv32a.def&
@@ -644,3 +712,14 @@ magic -d XR -T /home/p-brane/Desktop/work/tools/openlane_working_dir/pdks/sky130
 `sky130_fd_sc_hd__buf_1` was selected and expanded to better show the routing.
 
 ![](assets/sky130_apd_workshop_day5_lab1_results-4ab33ad8.png)
+
+Magic was used again to display the design for the design with CTS followed by routing.
+
+![](assets/sky130_apd_workshop_day5_lab1_results-c847cb2e.png)
+
+'sky130_jayinv' was expanded to show the cell layout with the routing.
+![](assets/sky130_apd_workshop_day5_lab1_results-042ac58b.png)`
+
+### Parasitic Extraction
+
+Parasitic RC extraction can be performed on the routed design using the python3 program `SPEF_EXTRACTOR`. The extraction is combined with the routed `picorv32a.def` file to check for timing errors due to parasitics. The parasitic extraction flow wasn't performed due to time limitations.
