@@ -728,7 +728,7 @@ Magic was used again to display the design for the design with CTS followed by r
 ![](assets/sky130_apd_workshop_day5_lab1_results-c847cb2e.png)
 
 'sky130_jayinv' was expanded to show the cell layout with the routing.
-![](assets/sky130_apd_workshop_day5_lab1_results-042ac58b.png)`
+![](assets/sky130_apd_workshop_day5_lab1_results-042ac58b.png)
 
 ### Parasitic Extraction
 
@@ -747,3 +747,7 @@ Parasitic RC extraction can be performed on the routed design using the python3 
 [Magic User's Guide](http://opencircuitdesign.com/magic/commandref/commands.html)
 [Magic GitHub](https://github.com/RTimothyEdwards/magic)
 * [ngspice](https://ngspice.sourceforge.io/spdevs.html)
+
+## Certificate of Completion
+
+![](assets/2022_VSD-IAT_Workshop_Certificate_jay_morreale.jpg)
