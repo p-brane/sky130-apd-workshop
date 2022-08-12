@@ -750,4 +750,4 @@ Parasitic RC extraction can be performed on the routed design using the python3 
 
 ## Certificate of Completion
 
-![](assets/2022_VSD-IAT_Workshop_Certificate_jay_morreale.jpg)
+![](assets/2022_VSD-IAT_Workshop_Certificate_jay_morreale2.jpg)
